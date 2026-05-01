@@ -377,9 +377,7 @@
       overflow: hidden;
       cursor: pointer;
     }
-    .room-card:first-child {
-      grid-column: span 2;
-    }
+    /* first room card span handled by JS cmsRenderRooms */
     .room-img {
       width: 100%;
       aspect-ratio: 4/3;
@@ -388,9 +386,7 @@
       transition: transform 0.45s ease;
       background: #d0ccc5;
     }
-    .room-card:first-child .room-img {
-      aspect-ratio: 16/9;
-    }
+    /* first room img aspect-ratio handled by JS cmsRenderRooms */
     .room-card:hover .room-img { transform: scale(1.04); }
     .room-overlay {
       position: absolute;
@@ -421,6 +417,124 @@
       color: rgba(255,255,255,0.65);
       margin-top: 4px;
     }
+    .room-photo-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: rgba(0,0,0,0.52);
+      color: #fff;
+      font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+      padding: 3px 9px; border-radius: 20px;
+      display: flex; align-items: center; gap: 4px;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+    }
+
+    /* ── Lightbox ────────────────────────────────────────────── */
+    #lightbox {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,0.95);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    .lb-close {
+      position: absolute; top: 16px; right: 20px;
+      background: rgba(255,255,255,0.1); border: none;
+      color: rgba(255,255,255,0.75); font-size: 20px;
+      width: 38px; height: 38px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: background 0.15s, color 0.15s;
+    }
+    .lb-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .lb-img-wrap {
+      position: relative; display: flex; align-items: center;
+      justify-content: center; width: 100%; max-width: 920px;
+      padding: 0 64px;
+    }
+    #lb-img {
+      max-width: 100%; max-height: 68vh;
+      object-fit: contain; border-radius: 4px; display: block;
+      transition: opacity 0.18s;
+    }
+    .lb-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.12); border: none;
+      color: #fff; font-size: 22px;
+      width: 42px; height: 42px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: background 0.15s;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.25); }
+    .lb-btn.lb-prev { left: 10px; }
+    .lb-btn.lb-next { right: 10px; }
+    .lb-btn[hidden] { display: none; }
+    .lb-info { margin-top: 14px; text-align: center; }
+    .lb-room-name { font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 5px; letter-spacing: 0.5px; }
+    .lb-counter { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+    .lb-thumbs {
+      display: flex; gap: 6px; margin-top: 14px;
+      flex-wrap: wrap; justify-content: center;
+      max-width: 700px; padding: 0 20px;
+    }
+    .lb-thumb {
+      width: 54px; height: 38px; object-fit: cover;
+      border-radius: 3px; cursor: pointer; opacity: 0.45;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, opacity 0.15s;
+    }
+    .lb-thumb.active { border-color: var(--gold-light); opacity: 1; }
+    .lb-thumb:hover { opacity: 0.85; }
+
+    /* ── Admin multi-photo styles ────────────────────────────── */
+    .adm-photo-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+    .adm-photo-row { display: flex; gap: 6px; align-items: center; }
+    .adm-photo-row .adm-input { flex: 1; min-width: 0; }
+    .adm-photo-thumb {
+      width: 48px; height: 36px; object-fit: cover;
+      border-radius: 3px; border: 1px solid #e2e5ea;
+      background: #f4f5f7; flex-shrink: 0;
+    }
+    .adm-btn-del-photo {
+      flex-shrink: 0; background: none; border: 1px solid #e2e5ea;
+      border-radius: 4px; padding: 6px 8px; cursor: pointer;
+      color: #c0392b; font-size: 14px; line-height: 1;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .adm-btn-del-photo:hover { background: #fef2f2; border-color: #c0392b; }
+    .adm-btn-add-photo {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-family: 'Switzer', sans-serif; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      background: #f8f9fa; color: var(--muted);
+      border: 1.5px dashed #c8ccd4; border-radius: 4px;
+      padding: 7px 12px; cursor: pointer; width: 100%;
+      margin-top: 2px; transition: border-color 0.15s, color 0.15s;
+    }
+    .adm-btn-add-photo:hover { border-color: var(--gold); color: var(--gold); }
+    .adm-room-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #e2e5ea;
+    }
+    .adm-room-card-title { font-size: 12px; font-weight: 600; }
+    .adm-btn-del-room {
+      font-family: 'Switzer', sans-serif; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      background: #fef2f2; color: #c0392b;
+      border: 1px solid #fca5a5; border-radius: 4px;
+      padding: 5px 10px; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .adm-btn-del-room:hover { background: #fee2e2; border-color: #c0392b; }
+    .adm-btn-add-room {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 14px; margin-bottom: 14px;
+      font-family: 'Switzer', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      background: rgba(154,124,63,0.07); color: var(--gold);
+      border: 1.5px dashed var(--gold); border-radius: 6px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .adm-btn-add-room:hover { background: rgba(154,124,63,0.14); }
 
     /* ── Contact ─────────────────────────────────────────────── */
     .contact-section {
@@ -737,13 +851,12 @@
       .mobile-drawer { display: flex; }
       .services-grid { grid-template-columns: repeat(2, 1fr); }
       .rooms-grid { grid-template-columns: 1fr 1fr; }
-      .room-card:first-child { grid-column: span 2; }
       .contact-inner { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       .services-grid { grid-template-columns: 1fr; }
-      .rooms-grid { grid-template-columns: 1fr; }
-      .room-card:first-child { grid-column: span 1; }
+      .rooms-grid { grid-template-columns: 1fr !important; }
+      .rooms-grid .room-card { grid-column: 1 !important; }
       .contact-form { grid-template-columns: 1fr; }
       .form-group.full, .form-submit { grid-column: span 1; }
       .form-submit { flex-direction: column; align-items: flex-start; }
@@ -838,44 +951,8 @@
       <h2 class="section-title" id="cms-rm-title">Our Rooms & Suites</h2>
       <p class="section-desc" id="cms-rm-desc">Each space is a sanctuary — thoughtfully designed with premium materials, natural light, and panoramic views.</p>
     </div>
-    <div class="rooms-grid">
-
-      <div class="room-card">
-        <img class="room-img" id="cms-rm-img-0" src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80" alt="Presidential Suite" loading="lazy" />
-        <div class="room-overlay">
-          <span class="room-label" id="cms-rm-label-0">Signature</span>
-          <p class="room-name" id="cms-rm-name-0">Presidential Suite</p>
-          <p class="room-price" id="cms-rm-price-0">From €850 / night</p>
-        </div>
-      </div>
-
-      <div class="room-card">
-        <img class="room-img" id="cms-rm-img-1" src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=75" alt="Deluxe Room" loading="lazy" />
-        <div class="room-overlay">
-          <span class="room-label" id="cms-rm-label-1">Deluxe</span>
-          <p class="room-name" id="cms-rm-name-1">Deluxe King Room</p>
-          <p class="room-price" id="cms-rm-price-1">From €290 / night</p>
-        </div>
-      </div>
-
-      <div class="room-card">
-        <img class="room-img" id="cms-rm-img-2" src="https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75" alt="Junior Suite" loading="lazy" />
-        <div class="room-overlay">
-          <span class="room-label" id="cms-rm-label-2">Suite</span>
-          <p class="room-name" id="cms-rm-name-2">Junior Suite</p>
-          <p class="room-price" id="cms-rm-price-2">From €420 / night</p>
-        </div>
-      </div>
-
-      <div class="room-card">
-        <img class="room-img" id="cms-rm-img-3" src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&q=75" alt="Classic Room" loading="lazy" />
-        <div class="room-overlay">
-          <span class="room-label" id="cms-rm-label-3">Classic</span>
-          <p class="room-name" id="cms-rm-name-3">Classic Double</p>
-          <p class="room-price" id="cms-rm-price-3">From €195 / night</p>
-        </div>
-      </div>
-
+    <div class="rooms-grid" id="rooms-grid">
+      <!-- Populated by JS cmsRenderRooms() -->
     </div>
   </section>
 
@@ -974,6 +1051,21 @@
     <span onclick="openAdmin()" aria-label="Admin" style="width:10px;height:10px;border-radius:50%;background:#0a0a0a;display:inline-block;flex-shrink:0;cursor:pointer;"></span>
   </footer>
 
+  <!-- ── Lightbox ──────────────────────────────────────────────── -->
+  <div id="lightbox" role="dialog" aria-modal="true">
+    <button class="lb-close" onclick="lbClose()" aria-label="Close">&#x2715;</button>
+    <div class="lb-img-wrap">
+      <button class="lb-btn lb-prev" onclick="lbPrev()" aria-label="Previous">&#8249;</button>
+      <img id="lb-img" src="" alt="" />
+      <button class="lb-btn lb-next" onclick="lbNext()" aria-label="Next">&#8250;</button>
+    </div>
+    <div class="lb-info">
+      <p class="lb-room-name" id="lb-name"></p>
+      <p class="lb-counter" id="lb-counter"></p>
+    </div>
+    <div class="lb-thumbs" id="lb-thumbs"></div>
+  </div>
+
   <!-- ── Admin overlay ─────────────────────────────────────────── -->
   <div id="adminOverlay">
 
@@ -1041,7 +1133,7 @@
         <div class="adm-panel active" id="adm-panel-overview">
           <div class="adm-stats">
             <div class="adm-stat"><div class="adm-stat-label">Services</div><div class="adm-stat-value">3 <small>cards</small></div></div>
-            <div class="adm-stat"><div class="adm-stat-label">Rooms</div><div class="adm-stat-value">4 <small>listed</small></div></div>
+            <div class="adm-stat"><div class="adm-stat-label">Rooms</div><div class="adm-stat-value" id="admStatRooms">— <small>listed</small></div></div>
             <div class="adm-stat"><div class="adm-stat-label">Last saved</div><div class="adm-stat-value" id="admLastSaved" style="font-size:12px;font-weight:500;">—</div></div>
           </div>
           <div class="adm-card">
@@ -1223,6 +1315,53 @@
       btn.style.opacity = '0.7';
       btn.disabled = true;
     }
+
+    // ── Lightbox ──────────────────────────────────────────────
+    let _lbPhotos = [], _lbIdx = 0;
+
+    function lbOpen(photos, name) {
+      const valid = photos.filter(Boolean);
+      if (!valid.length) return;
+      _lbPhotos = valid; _lbIdx = 0;
+      _lbUpdate(name);
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function lbClose() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function lbPrev() { _lbIdx = (_lbIdx - 1 + _lbPhotos.length) % _lbPhotos.length; _lbUpdate(); }
+    function lbNext() { _lbIdx = (_lbIdx + 1) % _lbPhotos.length; _lbUpdate(); }
+    function _lbUpdate(name) {
+      const img = document.getElementById('lb-img');
+      img.style.opacity = '0';
+      img.src = _lbPhotos[_lbIdx];
+      img.onload = () => { img.style.opacity = '1'; };
+      if (name !== undefined) document.getElementById('lb-name').textContent = name;
+      document.getElementById('lb-counter').textContent =
+        _lbPhotos.length > 1 ? (_lbIdx + 1) + ' / ' + _lbPhotos.length : '';
+      // Thumbs
+      const tb = document.getElementById('lb-thumbs');
+      tb.innerHTML = _lbPhotos.length > 1 ? _lbPhotos.map((src, i) =>
+        `<img class="lb-thumb${i===_lbIdx?' active':''}" src="${src}" onclick="_lbGo(${i})" alt="" />`
+      ).join('') : '';
+      // Arrows
+      const single = _lbPhotos.length <= 1;
+      document.querySelector('.lb-prev').hidden = single;
+      document.querySelector('.lb-next').hidden = single;
+    }
+    function _lbGo(i) { _lbIdx = i; _lbUpdate(); }
+
+    // Close lightbox on backdrop click or Escape
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) lbClose();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'ArrowLeft')  lbPrev();
+      if (e.key === 'ArrowRight') lbNext();
+    });
   </script>
 
   <style>
@@ -1256,10 +1395,10 @@
       eyebrow: 'Accommodations', title: 'Our Rooms & Suites',
       desc: 'Each space is a sanctuary — thoughtfully designed with premium materials, natural light, and panoramic views.',
       items: [
-        { label:'Signature', name:'Presidential Suite',  price:'From €850 / night', img:'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80' },
-        { label:'Deluxe',    name:'Deluxe King Room',    price:'From €290 / night', img:'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=75' },
-        { label:'Suite',     name:'Junior Suite',        price:'From €420 / night', img:'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75' },
-        { label:'Classic',   name:'Classic Double',      price:'From €195 / night', img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&q=75' },
+        { label:'Signature', name:'Presidential Suite',  price:'From €850 / night', photos:['https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80'] },
+        { label:'Deluxe',    name:'Deluxe King Room',    price:'From €290 / night', photos:['https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=75'] },
+        { label:'Suite',     name:'Junior Suite',        price:'From €420 / night', photos:['https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=75'] },
+        { label:'Classic',   name:'Classic Double',      price:'From €195 / night', photos:['https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&q=75'] },
       ]
     },
     contact: {
@@ -1273,7 +1412,7 @@
 
   // ── Hotel Veizi — Supabase config (isolated project) ──
   const HV_URL = 'https://dirnsligikbxlwtcsmoj.supabase.co';
-  const HV_KEY = 'sb_publishable_cYCsR1twUTSxKWLwwWOJSA_LYqdpHVy';
+  const HV_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpcm5zbGlnaWtieGx3dGNzbW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NDA5NjUsImV4cCI6MjA5MzExNjk2NX0.j2BVGx0CELPw0X3DVoRs3FNJ6wOorX3dp3l7rMpW1L8';
   const HV_BUCKET = 'hotel-images';
   const HV_TABLE  = 'hotel_konfigurimi';
   const HV_KEY_NAME = 'hv_content';
@@ -1368,16 +1507,46 @@
     const rm = data.rooms;
     if (rm) {
       cmsSet('cms-rm-eyebrow', rm.eyebrow); cmsSet('cms-rm-title', rm.title); cmsSet('cms-rm-desc', rm.desc);
-      (rm.items || []).forEach((item, i) => {
-        cmsSet(`cms-rm-label-${i}`, item.label); cmsSet(`cms-rm-name-${i}`, item.name);
-        cmsSet(`cms-rm-price-${i}`, item.price); cmsAttr(`cms-rm-img-${i}`, 'src', item.img);
-      });
+      cmsRenderRooms(rm.items || []);
     }
     const ct = data.contact;
     if (ct) {
       cmsSet('cms-ct-eyebrow', ct.eyebrow); cmsSet('cms-ct-title', ct.title); cmsSet('cms-ct-desc', ct.desc);
       cmsSet('cms-ct-address', ct.address); cmsSet('cms-ct-phone', ct.phone); cmsSet('cms-ct-email', ct.email);
       cmsSet('cms-ct-times', (ct.checkin || '3:00 PM') + ' — ' + (ct.checkout || '12:00 PM'));
+    }
+  }
+
+  // ── Render rooms grid on the live page ──
+  function cmsRenderRooms(items) {
+    const grid = document.getElementById('rooms-grid');
+    if (!grid) return;
+    grid.innerHTML = items.map((item, i) => {
+      // Support both old `img` field and new `photos` array
+      const photos = item.photos && item.photos.length ? item.photos : (item.img ? [item.img] : ['']);
+      const cover  = photos[0] || '';
+      const multi  = photos.filter(Boolean).length > 1;
+      const safePhotos = JSON.stringify(photos.filter(Boolean));
+      const safeName   = (item.name  || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `
+        <div class="room-card${i === 0 ? '' : ''}" style="${i===0?'grid-column:span 2;':''}"
+             onclick="lbOpen(${safePhotos},'${safeName}')" tabindex="0"
+             onkeydown="if(event.key==='Enter')lbOpen(${safePhotos},'${safeName}')">
+          <img class="room-img" src="${esc(cover)}" alt="${esc(item.name)}" loading="lazy" style="${i===0?'aspect-ratio:16/9;':'aspect-ratio:4/3;'}" />
+          ${multi ? `<div class="room-photo-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${photos.filter(Boolean).length}</div>` : ''}
+          <div class="room-overlay">
+            <span class="room-label">${esc(item.label)}</span>
+            <p class="room-name">${esc(item.name)}</p>
+            <p class="room-price">${esc(item.price)}</p>
+          </div>
+        </div>`;
+    }).join('');
+    // Responsive fix: first card spans 2 cols only if 3+ cards
+    const cards = grid.querySelectorAll('.room-card');
+    if (cards.length >= 3) {
+      cards[0].style.gridColumn = 'span 2';
+    } else if (cards.length === 2) {
+      cards[0].style.gridColumn = '';
     }
   }
 
@@ -1424,7 +1593,10 @@
     }
   }
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeAdmin();
+    if (e.key === 'Escape') {
+      if (document.getElementById('lightbox').classList.contains('open')) lbClose();
+      else closeAdmin();
+    }
     if (e.key === 'Enter' && document.getElementById('adminOverlay').classList.contains('open')
         && !document.getElementById('admDash').classList.contains('visible')) admDoLogin();
   });
@@ -1532,27 +1704,106 @@
       </div>`).join('');
   }
 
-  // ── Render room items ──
+  // ── Rooms data (mutable working copy) ──
+  let admRoomsData = [];
+
+  function admCollectRooms() {
+    admRoomsData.forEach((room, i) => {
+      room.label = document.getElementById(`adm_rm_label_${i}`)?.value ?? room.label;
+      room.name  = document.getElementById(`adm_rm_name_${i}`)?.value  ?? room.name;
+      room.price = document.getElementById(`adm_rm_price_${i}`)?.value ?? room.price;
+      room.photos = room.photos.map((_, j) =>
+        document.getElementById(`adm_rm_photo_${i}_${j}`)?.value ?? room.photos[j]
+      );
+    });
+  }
+
+  function admAddRoom() {
+    admCollectRooms();
+    admRoomsData.push({ label:'New', name:'New Room', price:'From €0 / night', photos:[''] });
+    admRenderRooms(admRoomsData);
+  }
+
+  function admDeleteRoom(i) {
+    admCollectRooms();
+    admRoomsData.splice(i, 1);
+    admRenderRooms(admRoomsData);
+  }
+
+  function admAddRoomPhoto(i) {
+    admCollectRooms();
+    admRoomsData[i].photos.push('');
+    admRenderRooms(admRoomsData);
+  }
+
+  function admDeleteRoomPhoto(i, j) {
+    admCollectRooms();
+    admRoomsData[i].photos.splice(j, 1);
+    if (!admRoomsData[i].photos.length) admRoomsData[i].photos = [''];
+    admRenderRooms(admRoomsData);
+  }
+
+  async function admHandleRoomPhotoUpload(fileInput, i, j) {
+    const file = fileInput.files[0]; if (!file) return;
+    const thumbEl = document.getElementById(`adm_rm_thumb_${i}_${j}`);
+    const inputEl = document.getElementById(`adm_rm_photo_${i}_${j}`);
+    const tmp = URL.createObjectURL(file);
+    if (thumbEl) thumbEl.src = tmp;
+    const blob = await admCompress(file);
+    const path = `hotel/room-${i}-photo-${j}-${Date.now()}.jpg`;
+    const publicUrl = await hvUploadImg(new File([blob], path, {type:'image/jpeg'}), path);
+    URL.revokeObjectURL(tmp);
+    const finalUrl = publicUrl || await new Promise(r => {
+      const fr = new FileReader();
+      fr.onload = e => r(e.target.result);
+      fr.readAsDataURL(blob);
+    });
+    if (inputEl) inputEl.value = finalUrl;
+    if (thumbEl) thumbEl.src = finalUrl;
+    admRoomsData[i].photos[j] = finalUrl;
+  }
+
+  // ── Render room items in admin ──
   function admRenderRooms(items) {
-    document.getElementById('adm-rm-items').innerHTML = items.map((item, i) => `
+    admRoomsData = items.map(item => ({
+      ...item,
+      photos: item.photos && item.photos.length ? [...item.photos] : (item.img ? [item.img] : [''])
+    }));
+    const upSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+    document.getElementById('adm-rm-items').innerHTML =
+      `<button type="button" class="adm-btn-add-room" onclick="admAddRoom()">
+        + Add Room Type
+      </button>` +
+      admRoomsData.map((item, i) => `
       <div class="adm-card" style="margin-bottom:12px;">
-        <div class="adm-card-title">Room ${i+1}</div>
-        <div class="adm-grid adm-grid cols3">
+        <div class="adm-room-card-header">
+          <span class="adm-room-card-title">Room ${i+1}</span>
+          <button type="button" class="adm-btn-del-room" onclick="admDeleteRoom(${i})">Delete</button>
+        </div>
+        <div class="adm-grid cols3" style="margin-bottom:14px;">
           <div class="adm-field"><label>Badge</label><input class="adm-input" id="adm_rm_label_${i}" type="text" value="${esc(item.label)}" /></div>
           <div class="adm-field"><label>Name</label><input class="adm-input" id="adm_rm_name_${i}" type="text" value="${esc(item.name)}" /></div>
           <div class="adm-field"><label>Price</label><input class="adm-input" id="adm_rm_price_${i}" type="text" value="${esc(item.price)}" /></div>
-          <div class="adm-field full">
-            <label>Image</label>
-            <div class="adm-img-row">
-              <input class="adm-input" id="adm_rm_img_${i}" type="text" value="${esc(item.img)}" placeholder="URL or upload…" oninput="admPreviewImg('adm_rm_img_${i}','adm_rm_imgp_${i}')" />
-              <button type="button" class="adm-btn-upload" onclick="admTriggerUpload('adm_rm_imgf_${i}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload
-              </button>
-              <input class="adm-file-hidden" type="file" id="adm_rm_imgf_${i}" accept="image/*" onchange="admHandleUpload(this,'adm_rm_img_${i}','adm_rm_imgp_${i}','room-${i}')" />
-            </div>
-            <img class="adm-img-preview" id="adm_rm_imgp_${i}" src="${esc(item.img)}" alt="" />
+        </div>
+        <div class="adm-field full">
+          <label>Photos</label>
+          <div class="adm-photo-list">
+            ${item.photos.map((url, j) => `
+              <div class="adm-photo-row">
+                <img class="adm-photo-thumb" id="adm_rm_thumb_${i}_${j}" src="${esc(url)}" alt="" />
+                <input class="adm-input" id="adm_rm_photo_${i}_${j}" type="text" value="${esc(url)}" placeholder="URL or upload…"
+                  oninput="document.getElementById('adm_rm_thumb_${i}_${j}').src=this.value" />
+                <button type="button" class="adm-btn-upload" onclick="admTriggerUpload('adm_rm_pf_${i}_${j}')" title="Upload">
+                  ${upSvg}Upload
+                </button>
+                <input class="adm-file-hidden" type="file" id="adm_rm_pf_${i}_${j}" accept="image/*"
+                  onchange="admHandleRoomPhotoUpload(this,${i},${j})" />
+                <button type="button" class="adm-btn-del-photo" onclick="admDeleteRoomPhoto(${i},${j})" title="Remove photo">&#x2715;</button>
+              </div>`).join('')}
           </div>
+          <button type="button" class="adm-btn-add-photo" onclick="admAddRoomPhoto(${i})">
+            + Add Photo
+          </button>
         </div>
       </div>`).join('');
   }
@@ -1580,6 +1831,8 @@
     document.getElementById('adm_rm_title').value   = rm.title;
     document.getElementById('adm_rm_desc').value    = rm.desc;
     admRenderRooms(rm.items);
+    const statEl = document.getElementById('admStatRooms');
+    if (statEl) statEl.innerHTML = rm.items.length + ' <small>listed</small>';
 
     const ct = admGet('contact');
     document.getElementById('adm_ct_eyebrow').value  = ct.eyebrow;
@@ -1621,15 +1874,16 @@
       };
     }
     if (section === 'rooms') {
+      admCollectRooms();
       data.rooms = {
         eyebrow: document.getElementById('adm_rm_eyebrow').value,
         title:   document.getElementById('adm_rm_title').value,
         desc:    document.getElementById('adm_rm_desc').value,
-        items: ADM_DEFAULTS.rooms.items.map((_, i) => ({
-          label: document.getElementById(`adm_rm_label_${i}`).value,
-          name:  document.getElementById(`adm_rm_name_${i}`).value,
-          price: document.getElementById(`adm_rm_price_${i}`).value,
-          img:   document.getElementById(`adm_rm_img_${i}`).value,
+        items: admRoomsData.map(room => ({
+          label:  room.label,
+          name:   room.name,
+          price:  room.price,
+          photos: room.photos.filter(Boolean),
         }))
       };
     }
@@ -1658,6 +1912,12 @@
 
     msg.textContent = 'Saved ✓';
     setTimeout(() => { msg.classList.remove('show'); msg.textContent = 'Saved!'; }, 2500);
+
+    // Update rooms stat
+    if (section === 'rooms') {
+      const statEl = document.getElementById('admStatRooms');
+      if (statEl) statEl.innerHTML = admRoomsData.length + ' <small>listed</small>';
+    }
 
     // Update timestamp in overview
     const ls = localStorage.getItem('hv_saved');
