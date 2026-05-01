@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Hotel Veizi</title>
   <style>
     /* ── Switzer font-face declarations ───────────────────────── */
@@ -428,33 +428,48 @@
       backdrop-filter: blur(6px);
       pointer-events: none;
     }
+    @media (max-width: 640px) {
+      .room-photo-badge { display: none; }
+      /* uniform 4/3 ratio for all room cards on mobile */
+      .room-card .room-img { aspect-ratio: 4/3 !important; }
+    }
 
     /* ── Lightbox ────────────────────────────────────────────── */
     #lightbox {
       position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,0.95);
+      background: rgba(0,0,0,0.96);
       display: none; flex-direction: column;
       align-items: center; justify-content: center;
+      /* iOS safe area */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      -webkit-overflow-scrolling: touch;
     }
     #lightbox.open { display: flex; }
     .lb-close {
-      position: absolute; top: 16px; right: 20px;
-      background: rgba(255,255,255,0.1); border: none;
-      color: rgba(255,255,255,0.75); font-size: 20px;
-      width: 38px; height: 38px; border-radius: 50%;
+      position: absolute; top: max(16px, env(safe-area-inset-top, 16px)); right: 16px;
+      background: rgba(255,255,255,0.12); border: none;
+      color: rgba(255,255,255,0.8); font-size: 18px;
+      width: 40px; height: 40px; border-radius: 50%;
       cursor: pointer; display: flex; align-items: center;
-      justify-content: center; transition: background 0.15s, color 0.15s;
+      justify-content: center; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent; z-index: 10;
     }
-    .lb-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .lb-close:hover, .lb-close:active { background: rgba(255,255,255,0.22); color: #fff; }
     .lb-img-wrap {
       position: relative; display: flex; align-items: center;
       justify-content: center; width: 100%; max-width: 920px;
-      padding: 0 64px;
+      padding: 0 60px;
+      /* touch-action set in JS */
+      user-select: none; -webkit-user-select: none;
     }
     #lb-img {
       max-width: 100%; max-height: 68vh;
       object-fit: contain; border-radius: 4px; display: block;
-      transition: opacity 0.18s;
+      transition: opacity 0.16s; pointer-events: none;
+      -webkit-user-drag: none;
     }
     .lb-btn {
       position: absolute; top: 50%; transform: translateY(-50%);
@@ -463,10 +478,11 @@
       width: 42px; height: 42px; border-radius: 50%;
       cursor: pointer; display: flex; align-items: center;
       justify-content: center; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .lb-btn:hover { background: rgba(255,255,255,0.25); }
-    .lb-btn.lb-prev { left: 10px; }
-    .lb-btn.lb-next { right: 10px; }
+    .lb-btn:hover, .lb-btn:active { background: rgba(255,255,255,0.26); }
+    .lb-btn.lb-prev { left: 8px; }
+    .lb-btn.lb-next { right: 8px; }
     .lb-btn[hidden] { display: none; }
     .lb-info { margin-top: 14px; text-align: center; }
     .lb-room-name { font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 5px; letter-spacing: 0.5px; }
@@ -481,9 +497,28 @@
       border-radius: 3px; cursor: pointer; opacity: 0.45;
       border: 2px solid transparent;
       transition: border-color 0.15s, opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
     .lb-thumb.active { border-color: var(--gold-light); opacity: 1; }
     .lb-thumb:hover { opacity: 0.85; }
+
+    /* ── Lightbox mobile overrides ──────────────────────────── */
+    @media (max-width: 640px) {
+      .lb-img-wrap {
+        padding: 0;
+        width: 100vw;
+        touch-action: pan-y pinch-zoom;
+      }
+      #lb-img {
+        width: 100vw;
+        max-height: 60vh;
+        border-radius: 0;
+      }
+      .lb-btn { display: none; }  /* hidden on mobile — swipe instead */
+      .lb-thumbs { margin-top: 10px; gap: 5px; }
+      .lb-thumb { width: 44px; height: 32px; }
+      .lb-room-name { font-size: 12px; }
+    }
 
     /* ── Admin multi-photo styles ────────────────────────────── */
     .adm-photo-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
@@ -1318,17 +1353,24 @@
 
     // ── Lightbox ──────────────────────────────────────────────
     let _lbPhotos = [], _lbIdx = 0;
+    const _lb = document.getElementById('lightbox');
+    const _lbImgWrap = _lb.querySelector('.lb-img-wrap');
 
     function lbOpen(photos, name) {
       const valid = photos.filter(Boolean);
       if (!valid.length) return;
       _lbPhotos = valid; _lbIdx = 0;
       _lbUpdate(name);
-      document.getElementById('lightbox').classList.add('open');
+      _lb.classList.add('open');
+      // iOS: prevent body scroll without breaking lightbox scroll
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
     }
     function lbClose() {
-      document.getElementById('lightbox').classList.remove('open');
+      _lb.classList.remove('open');
+      document.body.style.position = '';
+      document.body.style.width = '';
       document.body.style.overflow = '';
     }
     function lbPrev() { _lbIdx = (_lbIdx - 1 + _lbPhotos.length) % _lbPhotos.length; _lbUpdate(); }
@@ -1338,30 +1380,70 @@
       img.style.opacity = '0';
       img.src = _lbPhotos[_lbIdx];
       img.onload = () => { img.style.opacity = '1'; };
+      // If image is cached it won't fire onload — force opacity
+      if (img.complete) img.style.opacity = '1';
       if (name !== undefined) document.getElementById('lb-name').textContent = name;
       document.getElementById('lb-counter').textContent =
         _lbPhotos.length > 1 ? (_lbIdx + 1) + ' / ' + _lbPhotos.length : '';
-      // Thumbs
       const tb = document.getElementById('lb-thumbs');
       tb.innerHTML = _lbPhotos.length > 1 ? _lbPhotos.map((src, i) =>
         `<img class="lb-thumb${i===_lbIdx?' active':''}" src="${src}" onclick="_lbGo(${i})" alt="" />`
       ).join('') : '';
-      // Arrows
       const single = _lbPhotos.length <= 1;
       document.querySelector('.lb-prev').hidden = single;
       document.querySelector('.lb-next').hidden = single;
     }
     function _lbGo(i) { _lbIdx = i; _lbUpdate(); }
 
-    // Close lightbox on backdrop click or Escape
-    document.getElementById('lightbox').addEventListener('click', function(e) {
+    // Close on backdrop click
+    _lb.addEventListener('click', function(e) {
       if (e.target === this) lbClose();
     });
+
+    // Keyboard
     document.addEventListener('keydown', function(e) {
-      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (!_lb.classList.contains('open')) return;
       if (e.key === 'ArrowLeft')  lbPrev();
       if (e.key === 'ArrowRight') lbNext();
     });
+
+    // ── Swipe (touch) ─────────────────────────────────────
+    (function() {
+      let _tx = 0, _ty = 0, _dragging = false, _dx = 0;
+      const THRESHOLD = 45; // px minimum swipe
+
+      _lbImgWrap.addEventListener('touchstart', function(e) {
+        if (e.touches.length !== 1) return;
+        _tx = e.touches[0].clientX;
+        _ty = e.touches[0].clientY;
+        _dx = 0;
+        _dragging = true;
+      }, { passive: true });
+
+      _lbImgWrap.addEventListener('touchmove', function(e) {
+        if (!_dragging || e.touches.length !== 1) return;
+        _dx = e.touches[0].clientX - _tx;
+        const dy = Math.abs(e.touches[0].clientY - _ty);
+        // If more horizontal than vertical, prevent page scroll
+        if (Math.abs(_dx) > dy && Math.abs(_dx) > 8) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      _lbImgWrap.addEventListener('touchend', function() {
+        if (!_dragging) return;
+        _dragging = false;
+        if (_lbPhotos.length > 1) {
+          if (_dx < -THRESHOLD) lbNext();
+          else if (_dx > THRESHOLD) lbPrev();
+        }
+        _dx = 0;
+      });
+
+      _lbImgWrap.addEventListener('touchcancel', function() {
+        _dragging = false; _dx = 0;
+      });
+    })();
   </script>
 
   <style>
