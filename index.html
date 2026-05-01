@@ -1518,22 +1518,30 @@
   }
 
   // ── Render rooms grid on the live page ──
+  // Room photo registry — avoids JSON in HTML attributes
+  const _roomPhotoMap = {};
+
   function cmsRenderRooms(items) {
     const grid = document.getElementById('rooms-grid');
     if (!grid) return;
     grid.innerHTML = items.map((item, i) => {
-      // Support both old `img` field and new `photos` array
       const photos = item.photos && item.photos.length ? item.photos : (item.img ? [item.img] : ['']);
-      const cover  = photos[0] || '';
-      const multi  = photos.filter(Boolean).length > 1;
-      const safePhotos = JSON.stringify(photos.filter(Boolean));
-      const safeName   = (item.name  || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      const valid  = photos.filter(Boolean);
+      const cover  = valid[0] || '';
+      const multi  = valid.length > 1;
+      // Store photos by index key so onclick doesn't embed JSON in HTML
+      _roomPhotoMap[i] = { photos: valid, name: item.name || '' };
       return `
-        <div class="room-card${i === 0 ? '' : ''}" style="${i===0?'grid-column:span 2;':''}"
-             onclick="lbOpen(${safePhotos},'${safeName}')" tabindex="0"
-             onkeydown="if(event.key==='Enter')lbOpen(${safePhotos},'${safeName}')">
-          <img class="room-img" src="${esc(cover)}" alt="${esc(item.name)}" loading="lazy" style="${i===0?'aspect-ratio:16/9;':'aspect-ratio:4/3;'}" />
-          ${multi ? `<div class="room-photo-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>${photos.filter(Boolean).length}</div>` : ''}
+        <div class="room-card" style="${i===0?'grid-column:span 2;':''}"
+             onclick="lbOpenRoom(${i})" tabindex="0"
+             onkeydown="if(event.key==='Enter')lbOpenRoom(${i})"
+             role="button" aria-label="View ${esc(item.name)} gallery">
+          <img class="room-img" src="${esc(cover)}" alt="${esc(item.name)}" loading="lazy"
+               style="${i===0?'aspect-ratio:16/9;':'aspect-ratio:4/3;'}" />
+          ${multi ? `<div class="room-photo-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            ${valid.length}
+          </div>` : ''}
           <div class="room-overlay">
             <span class="room-label">${esc(item.label)}</span>
             <p class="room-name">${esc(item.name)}</p>
@@ -1541,13 +1549,15 @@
           </div>
         </div>`;
     }).join('');
-    // Responsive fix: first card spans 2 cols only if 3+ cards
+    // First card spans 2 cols if 3+ rooms
     const cards = grid.querySelectorAll('.room-card');
-    if (cards.length >= 3) {
-      cards[0].style.gridColumn = 'span 2';
-    } else if (cards.length === 2) {
-      cards[0].style.gridColumn = '';
-    }
+    if (cards.length >= 3) cards[0].style.gridColumn = 'span 2';
+    else if (cards.length <= 2) cards[0] && (cards[0].style.gridColumn = '');
+  }
+
+  function lbOpenRoom(i) {
+    const d = _roomPhotoMap[i];
+    if (d && d.photos.length) lbOpen(d.photos, d.name);
   }
 
   // Apply from localStorage immediately (fast), then sync from Hotel Veizi Supabase in background
